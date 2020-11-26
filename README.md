@@ -13,11 +13,11 @@ This script allows (allow) to install all the testers for the LIBFT and to param
 
 ### Via curl
 
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/LinkPhoenix/libft_ironman/master/install_ironman_42.sh)"
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/LinkPhoenix/libft_ironman/main/install_ironman_42.sh)"
 
 ### Via wget
 
-    bash -c "$(wget https://raw.githubusercontent.com/LinkPhoenix/libft_ironman/master/install_ironman_42.sh -O -)"
+    bash -c "$(wget https://raw.githubusercontent.com/LinkPhoenix/libft_ironman/main/install_ironman_42.sh -O -)"
 
 ## Check List
 
