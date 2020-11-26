@@ -80,6 +80,20 @@ setup_color() {
     fi
 }
 
+setup_emoji(){
+	CHECK_FLAG=✅
+	ERROR_FLAG=❌
+	SHELL_FLAG=🐚
+	WARNING_FLAG=🚨
+	INFORMATION_FLAG=ℹ️
+
+	export CHECK_FLAG
+	export ERROR_FLAG
+	export SHELL_FLAG
+	export WARNING_FLAG
+	export INFORMATION_FLAG
+}
+
 message_exit() {
     echo "${YELLOW}#######################################################${RESET}"
     echo ""
@@ -102,23 +116,19 @@ header() {
 }
 
 launching_command() {
-    echo "${YELLOW}Command : ${RESET}${BG_BLACK}${ITALIC}$ $1 ${RESET}"
+    echo "${SHELL_FLAG}${YELLOW} : ${RESET}${BG_BLACK}${ITALIC}$ $1 ${RESET}"
 }
 
 warning_text() {
-    echo ""
-    echo "${RED}#######################################################${RESET}"
     echo "${RED}${BOLD}$1${RESET}"
-    echo "${RED}#######################################################${RESET}"
-    echo ""
 }
 
 detect_text() {
-    echo "${GREEN}${BOLD}$1${RESET}"
+    echo "${CHECK_FLAG} ${GREEN}${BOLD}$1${RESET}"
 }
 
 information() {
-    echo "${RED}${BOLD}$1${RESET}"
+    echo "${INFORMATION_FLAG} ${RED}${BOLD}$1${RESET}"
     press_any_key_to_continue
 }
 
@@ -127,17 +137,32 @@ press_any_key_to_continue() {
     printf "\n"
 }
 
-ask() {
-    # call with a prompt string or use a default
-    read -r -p "${1:-Are you sure? [y/N]} " response
-    case "$response" in
-    [yY][eE][sS] | [yY])
-        $1
-        ;;
-    *)
-        continue
-        ;;
-    esac
+ask_install_alias() {
+    set -- $(locale LC_MESSAGES)
+    yesptrn="$1"
+    noptrn="$2"
+    yesword="$3"
+    noword="$4"
+    while true; do
+
+        echo ""
+        read -p "${YELLOW} Do you want install alias $ALIAS_NAME in your ZSHRC ? [${yesword}/${noword}]? ${RESET}" yn
+        case $yn in
+        ${yesptrn##^})
+			launching_command "echo alias ${ALIAS_TESTER} >> ~/.zshrc"
+            echo alias ${ALIAS_TESTER} >> ~/.zshrc
+            break
+            ;;
+        ${yesword##^})
+			launching_command "echo alias ${ALIAS_TESTER} >> ~/.zshrc"
+            echo alias ${ALIAS_TESTER} >> ~/.zshrc
+            break
+            ;;
+        ${noptrn##^}) break ;;
+        ${noword##^}) break ;;
+        *) echo "Answer ${yesword} / ${noword}." ;;
+        esac
+    done
 }
 
 ask_libft_path() {
@@ -164,6 +189,7 @@ export PATH_LIBFT
 main() {
 
 	setup_color
+	setup_emoji
 
 	header="
  _    _________________ _____   _____               ___  ___            
@@ -211,7 +237,7 @@ main() {
 			information "Your tester is already initialize"
 			# https://stackoverflow.com/questions/11145270/how-to-replace-an-entire-line-in-a-text-file-by-line-number
 			launching_command "vim -c ':%s/PATH_LIBFT=~/libft/PATH_LIBFT=$PATH_LIBFT/g'"
-			information "I use VIM for add the good Path, use :wq if all is good"
+			information "${WARNING_FLAG} I use VIM for add the good Path, use :wq if all is good"
 			if [ -d ${PATH_LIBFT/#~//$HOME/} ]; then
 				vim -c ":%s#PATH_LIBFT=\~/libft#PATH_LIBFT=${PATH_LIBFT/#~/$HOME}#g" $FILE/my_config.sh
 			else
@@ -222,7 +248,7 @@ main() {
 			information "I will launch grademe.sh for initialize the tester"
 			bash $FILE/grademe.sh
 			launching_command "vim -c ':%s/PATH_LIBFT=~/libft/PATH_LIBFT=$PATH_LIBFT/g'"
-			information "I use VIM for add the good Path, use :wq if all is good"
+			information "${WARNING_FLAG} I use VIM for add the good Path, use :wq if all is good"
 			if [ -d ${PATH_LIBFT/#~//$HOME/} ]; then
 				vim -c ":%s#PATH_LIBFT=\~/libft#PATH_LIBFT=${PATH_LIBFT/#~/$HOME}#g" $FILE/my_config.sh
 			else
@@ -230,23 +256,114 @@ main() {
 			fi
 		fi
 	else 
-		launching_command "git clone https://github.com/jtoty/Libftest ~/.testers42/Libftest/" "test"
+		launching_command "git clone https://github.com/jtoty/Libftest ~/.testers42/Libftest/"
 		information "I will download the Gihub Repo"
 		git clone https://github.com/jtoty/Libftest ~/.testers42/Libftest/
 		launching_command "bash $FILE/grademe.sh"
 		information "I will launch grademe.sh for initialize the tester"
 		bash $FILE/grademe.sh
 		launching_command "vim -c ':%s/PATH_LIBFT=~/libft/PATH_LIBFT=$PATH_LIBFT/g'"
-		information "I use VIM for add the good Path, use :wq if all is good"
+		information "${WARNING_FLAG} I use VIM for add the good Path, use :wq if all is good"
 		if [ -d ${PATH_LIBFT/#~//$HOME/} ]; then
-		    	vim -c ":%s#PATH_LIBFT=\~/libft#PATH_LIBFT=${PATH_LIBFT/#~/$HOME}#g" $FILE/my_config.sh
+			vim -c ":%s#PATH_LIBFT=\~/libft#PATH_LIBFT=${PATH_LIBFT/#~/$HOME}#g" $FILE/my_config.sh
 		else
 			vim -c ":%s#PATH_LIBFT=\~/libft#PATH_LIBFT=$PATH_LIBFT}#g" $FILE/my_config.sh
 		fi
 	fi
+	ALIAS_NAME="Warmachine"
+	ALIAS_TESTER="warmachine=\"bash ~/.testers42/Libftest/grademe.sh\""
+	export ALIAS_TESTER
+	export ALIAS_NAME
+
+	ask_install_alias
+
+
+		    info_script="
+	Installation Tester 2
+
+	Author              alelievr
+	Github              https://github.com/alelievr
+	URL Repository      https://github.com/alelievr/libft-unit-test
+
+"
+
+    i=0
+    while [ $i -lt ${#info_script} ]; do
+        sleep 0.001
+        echo -ne "${YELLOW}${BOLD}${info_script:$i:1}${RESET}" | tr -d "%"
+        ((i++))
+    done
+
+	FILE=~/.testers42/libft-unit-test
+	if [[ -s "$FILE" ]]; then
+		detect_text "$FILE exists."
+	else
+		launching_command "git clone https://github.com/alelievr/libft-unit-test ~/.testers42/Libft-unit-test/"
+		information "I will download the Gihub Repo"
+		git clone https://github.com/alelievr/libft-unit-test ~/.testers42/Libft-unit-test/
+	fi
+
+	information "I will check if the command so: exist in your Makefile"
+
+	info_script="
+You need add the command so in your Makefile like that
+
+so:
+	\$(CC) -fPIC \$(CFLAGS) \$(SRC)
+	gcc -shared -o libft.so \$(OBJ)
+
+Please add it in your Makefile
+"
+
+	if [[ -d ${PATH_LIBFT/#~//$HOME/} ]] ; then
+		if grep -q "so:" "${PATH_LIBFT/#~/$HOME}/Makefile"
+		then
+			detect_text "The command so: exist in your Makefile"
+		else
+			warning_text "The command so: exist in your Makefile"
+			i=0
+			while [ $i -lt ${#info_script} ]; do
+				sleep 0.001
+				echo -ne "${YELLOW}${BOLD}${info_script:$i:1}${RESET}" | tr -d "%"
+				((i++))
+			done
+			launching_command "vim +15 $PATH_LIBFT/Makefile"
+			press_any_key_to_continue
+			vim +15 ${PATH_LIBFT/#~/$HOME}/Makefile
+		fi
+	elif [[ -d "$PATH_LIBFT" ]] ; then
+		if grep -q "so:" "$PATH_LIBFT/Makefile"
+		then
+			detect_text "The command so: exist in your Makefile"
+		else
+			warning_text "The command so: exist in your Makefile"
+			i=0
+			while [ $i -lt ${#info_script} ]; do
+				sleep 0.001
+				echo -ne "${YELLOW}${BOLD}${info_script:$i:1}${RESET}" | tr -d "%"
+				((i++))
+			done
+			launching_command "vim +15 $PATH_LIBFT/Makefile"
+			press_any_key_to_continue
+			vim +15 $PATH_LIBFT/Makefile
+		fi
+	fi
+
+	information "I will change the \$LIBFTDIR var in the Makefile"
+	launching_command "vim -c \"\:\%\s\#LIBFTDIR	\=	../libft#LIBFTDIR	\=	${PATH_LIBFT}\#\g\" $FILE/Makefile"
+	if [ -d ${PATH_LIBFT/#~//$HOME/} ]; then
+		vim -c ":%s#LIBFTDIR	=	../libft#LIBFTDIR	=	${PATH_LIBFT/#~/$HOME}#g" $FILE/Makefile
+	else
+		vim -c ":%s#LIBFTDIR	=	../libft#LIBFTDIR	=	${PATH_LIBFT}#g" $FILE/Makefile
+	fi
+
+
+	y=$(pwd)
+	information "I will initialize the tester"
+	launching_command "cd $FILE && make && cd $y"
+	cd $FILE && make && cd $y
 
 	message_exit
-
 }
 
 main
