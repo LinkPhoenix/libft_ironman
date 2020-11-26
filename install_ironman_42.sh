@@ -81,8 +81,6 @@ setup_color() {
 }
 
 message_exit() {
-    echo ""
-    echo ""
     echo "${YELLOW}#######################################################${RESET}"
     echo ""
     echo "${RED}${BOLD}Thank you for using this script to the end${RESET}"
@@ -142,6 +140,27 @@ ask() {
     esac
 }
 
+ask_libft_path() {
+	PATH_LIBFT=
+while true ; do
+	# for read with autocomplete
+	# https://stackoverflow.com/questions/4819819/get-autocompletion-when-invoking-a-read-inside-a-bash-script
+	# for ask path
+	# https://superuser.com/questions/1201079/how-to-make-a-bash-script-ask-the-user-for-a-directory-and-if-its-not-found-as
+		read -e -p "Where is you Libft " PATH_LIBFT
+	#Use ~ in if
+	#https://askubuntu.com/questions/1093906/why-isnt-tilde-expansion-performed-on-the-input-to-read
+		if [ -d ${PATH_LIBFT/#~//$HOME/} ]; then
+		    	break
+		fi
+		if [ -d "$PATH_LIBFT" ] ; then
+			break
+		fi
+	echo "$PATH_LIBFT is not a directory..."
+done
+export PATH_LIBFT
+}
+
 main() {
 
 	setup_color
@@ -163,6 +182,10 @@ main() {
         ((i++))
     done
 
+	header "Ask where is your libft folder"
+
+	ask_libft_path
+
 	    info_script="
 	Installation Tester 1
 
@@ -180,19 +203,31 @@ main() {
     done
 
 	FILE=~/.testers42/Libftest
+	DEFAULT_PATH=~/libft
 	if [[ -s "$FILE" ]]; then
 		detect_text "$FILE exists."
 		if [[ -s "$FILE/my_config.sh" ]]; then
 			detect_text "$FILE/my_config.sh already exist"
 			information "Your tester is already initialize"
 			# https://stackoverflow.com/questions/11145270/how-to-replace-an-entire-line-in-a-text-file-by-line-number
-			launching_command "awk 'NR==8 {$0="PATH_LIBFT=~/.testers42/Libftest/"} 1' $FILE/my_config.sh"
-			information "I will edit my_config.sh in line 8 for add the good PATH"
-			awk 'NR==8 {$0="PATH_LIBFT=~/.testers42/Libftest/"} 1' $FILE/my_config.sh >/dev/null 2>&1
+			launching_command "vim -c ':%s/PATH_LIBFT=~/libft/PATH_LIBFT=$PATH_LIBFT/g'"
+			information "I use VIM for add the good Path, use :wq if all is good"
+			if [ -d ${PATH_LIBFT/#~//$HOME/} ]; then
+				vim -c ":%s#PATH_LIBFT=\~/libft#PATH_LIBFT=${PATH_LIBFT/#~/$HOME}#g" $FILE/my_config.sh
+			else
+				vim -c ":%s#PATH_LIBFT=\~/libft#PATH_LIBFT=$PATH_LIBFT}#g" $FILE/my_config.sh
+			fi
 		else
 			launching_command "bash $FILE/grademe.sh"
 			information "I will launch grademe.sh for initialize the tester"
 			bash $FILE/grademe.sh
+			launching_command "vim -c ':%s/PATH_LIBFT=~/libft/PATH_LIBFT=$PATH_LIBFT/g'"
+			information "I use VIM for add the good Path, use :wq if all is good"
+			if [ -d ${PATH_LIBFT/#~//$HOME/} ]; then
+				vim -c ":%s#PATH_LIBFT=\~/libft#PATH_LIBFT=${PATH_LIBFT/#~/$HOME}#g" $FILE/my_config.sh
+			else
+				vim -c ":%s#PATH_LIBFT=\~/libft#PATH_LIBFT=$PATH_LIBFT}#g" $FILE/my_config.sh
+			fi
 		fi
 	else 
 		launching_command "git clone https://github.com/jtoty/Libftest ~/.testers42/Libftest/" "test"
@@ -201,9 +236,13 @@ main() {
 		launching_command "bash $FILE/grademe.sh"
 		information "I will launch grademe.sh for initialize the tester"
 		bash $FILE/grademe.sh
-		launching_command "awk 'NR==8 {$0="PATH_LIBFT=~/.testers42/Libftest/"} 1' $FILE/my_config.sh"
-		information "I will edit my_config.sh in line 8 for add the good PATH"
-		awk 'NR==8 {$0="PATH_LIBFT=~/.testers42/Libftest/"} 1' $FILE/my_config.sh >/dev/null 2>&1
+		launching_command "vim -c ':%s/PATH_LIBFT=~/libft/PATH_LIBFT=$PATH_LIBFT/g'"
+		information "I use VIM for add the good Path, use :wq if all is good"
+		if [ -d ${PATH_LIBFT/#~//$HOME/} ]; then
+		    	vim -c ":%s#PATH_LIBFT=\~/libft#PATH_LIBFT=${PATH_LIBFT/#~/$HOME}#g" $FILE/my_config.sh
+		else
+			vim -c ":%s#PATH_LIBFT=\~/libft#PATH_LIBFT=$PATH_LIBFT}#g" $FILE/my_config.sh
+		fi
 	fi
 
 	message_exit
